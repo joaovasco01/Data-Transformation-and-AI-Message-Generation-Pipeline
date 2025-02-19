@@ -1,160 +1,3 @@
--- -- DEFAULT ONES 
-
--- SELECT
---     session_group,
---     MIN(patient_id) AS patient_id,  -- Unique per session
---     MIN(patient_name) AS patient_name,  
---     MIN(patient_age) AS patient_age,  
---     MIN(therapy_name) AS therapy_name,  
---     MIN(session_number) AS session_number,  
---     MIN(leave_session) AS leave_session,  
---     MIN(session_is_nok) AS session_is_nok,  
---     MIN(pain) AS pain,  
---     MIN(fatigue) AS fatigue,  
---     MIN(quality) AS quality,  
-
---     -- Aggregate quality_reason_* fields correctly (if any are non-zero, take the max)
---     MAX(quality_reason_movement_detection) AS quality_reason_movement_detection,
---     MAX(quality_reason_my_self_personal) AS quality_reason_my_self_personal,
---     MAX(quality_reason_other) AS quality_reason_other,
---     MAX(quality_reason_exercises) AS quality_reason_exercises,
---     MAX(quality_reason_tablet) AS quality_reason_tablet,
---     MAX(quality_reason_tablet_and_or_motion_trackers) AS quality_reason_tablet_and_or_motion_trackers,
---     MAX(quality_reason_easy_of_use) AS quality_reason_easy_of_use,
---     MAX(quality_reason_session_speed) AS quality_reason_session_speed
-
--- FROM exercise_results
--- GROUP BY session_group;
-
--- -- LEAVE_EXERCISE
-
--- WITH leave_exercise_counts AS (
---     SELECT
---         session_group,
---         COUNT(CASE WHEN leave_exercise IN (
---             'system_problem', 'other', 'unable_perform',
---             'technical_issues', 'difficulty', 'pain', 'tired'
---         ) THEN 1 ELSE NULL END) AS leave_exercise_total
---     FROM exercise_results
---     GROUP BY session_group
--- )
--- SELECT * FROM leave_exercise_counts;
-
--- -- PRESCRIBED_REPEATS
-
--- WITH prescribed_repeats AS (
---     SELECT
---         session_group,
---         SUM(prescribed_repeats) AS prescribed_repeats_total
---     FROM exercise_results
---     GROUP BY session_group
--- )
-
--- SELECT * FROM prescribed_repeats;
-
--- -- TRAINING_TIME
-
--- WITH training_time AS (
---     SELECT
---         session_group,
---         SUM(training_time) AS training_time_total
---     FROM exercise_results
---     GROUP BY session_group
--- )
-
--- SELECT * FROM training_time;
-
--- -- PERC_CORRECT_REPEATS
-
--- WITH perc_correct_repeats AS (
---     SELECT
---         session_group,
---         (SUM(correct_repeats) * 100.0 / NULLIF(SUM(prescribed_repeats), 0)) AS perc_correct_repeats
---     FROM exercise_results
---     GROUP BY session_group
--- )
-
--- SELECT * FROM perc_correct_repeats;
-
--- -- NUMBER_EXERCISES
-
--- WITH number_exercises AS (
---     SELECT
---         session_group,
---         COUNT(*) AS number_exercises
---     FROM exercise_results
---     GROUP BY session_group
--- )
-
--- SELECT * FROM number_exercises;
-
--- -- NUMBER_OF_DISTINCT_EXERCISES
-
--- WITH number_of_distinct_exercises AS (
---     SELECT
---         session_group,
---         COUNT(DISTINCT exercise_name) AS number_of_distinct_exercises
---     FROM exercise_results
---     GROUP BY session_group
--- )
-
--- SELECT * FROM number_of_distinct_exercises;
-
--- -- EXERCISE_WITH_MOST_INCORRECT
-
--- WITH incorrect_counts AS (
---     SELECT
---         session_group,
---         exercise_name,
---         SUM(wrong_repeats) AS total_wrong_repeats
---     FROM exercise_results
---     GROUP BY session_group, exercise_name
--- ),
--- ranked_exercises AS (
---     SELECT
---         session_group,
---         exercise_name,
---         total_wrong_repeats,
---         ROW_NUMBER() OVER (
---             PARTITION BY session_group
---             ORDER BY total_wrong_repeats DESC
---         ) AS rank_incorrect
---     FROM incorrect_counts
--- )
--- SELECT
---     session_group,
---     exercise_name AS exercise_with_most_incorrect
--- FROM ranked_exercises
--- WHERE rank_incorrect = 1;
-
-
--- --FIRST_EXERCISE_SKIPPED 
-
--- WITH skipped_exercises AS (
---     SELECT
---         session_group,
---         exercise_name AS first_exercise_skipped,
---         exercise_order,
---         ROW_NUMBER() OVER (
---             PARTITION BY session_group 
---             ORDER BY exercise_order ASC
---         ) AS row_num
---     FROM exercise_results
---     WHERE leave_exercise IS NOT NULL
--- ),
-
--- all_sessions AS (
---     SELECT DISTINCT session_group FROM exercise_results
--- )
-
--- SELECT 
---     a.session_group,
---     s.first_exercise_skipped  -- No COALESCE(), so NULLs remain NULL
--- FROM all_sessions a
--- LEFT JOIN skipped_exercises s
--- ON a.session_group = s.session_group AND s.row_num = 1;
-
-
 WITH base AS (
     SELECT
         session_group,
@@ -178,7 +21,7 @@ WITH base AS (
         MAX(quality_reason_tablet_and_or_motion_trackers) AS quality_reason_tablet_and_or_motion_trackers,
         MAX(quality_reason_easy_of_use) AS quality_reason_easy_of_use,
         MAX(quality_reason_session_speed) AS quality_reason_session_speed
-    FROM exercise_results
+    FROM "./data/exercise_results.parquet"
     GROUP BY session_group
 ),
 
@@ -188,7 +31,7 @@ leave_exercise_counts AS (
         COUNT(CASE WHEN leave_exercise IN (
             'system_problem', 'other', 'unable_perform', 'technical_issues', 'difficulty', 'pain', 'tired'
         ) THEN 1 ELSE NULL END) AS leave_exercise_total
-    FROM exercise_results
+    FROM "./data/exercise_results.parquet"
     GROUP BY session_group
 ),
 
@@ -196,7 +39,7 @@ prescribed_repeats AS (
     SELECT
         session_group,
         SUM(prescribed_repeats) AS prescribed_repeats_total
-    FROM exercise_results
+    FROM "./data/exercise_results.parquet"
     GROUP BY session_group
 ),
 
@@ -204,7 +47,7 @@ training_time AS (
     SELECT
         session_group,
         SUM(training_time) AS training_time_total
-    FROM exercise_results
+    FROM "./data/exercise_results.parquet"
     GROUP BY session_group
 ),
 
@@ -212,7 +55,7 @@ perc_correct_repeats AS (
     SELECT
         session_group,
         (SUM(correct_repeats) * 100.0 / NULLIF(SUM(prescribed_repeats), 0)) AS perc_correct_repeats
-    FROM exercise_results
+    FROM "./data/exercise_results.parquet"
     GROUP BY session_group
 ),
 
@@ -220,7 +63,7 @@ number_exercises AS (
     SELECT
         session_group,
         COUNT(*) AS number_exercises
-    FROM exercise_results
+    FROM "./data/exercise_results.parquet"
     GROUP BY session_group
 ),
 
@@ -228,7 +71,7 @@ number_of_distinct_exercises AS (
     SELECT
         session_group,
         COUNT(DISTINCT exercise_name) AS number_of_distinct_exercises
-    FROM exercise_results
+    FROM "./data/exercise_results.parquet"
     GROUP BY session_group
 ),
 
@@ -237,7 +80,7 @@ incorrect_counts AS (
         session_group,
         exercise_name,
         SUM(wrong_repeats) AS total_wrong_repeats
-    FROM exercise_results
+    FROM "./data/exercise_results.parquet"
     GROUP BY session_group, exercise_name
 ),
 
@@ -270,12 +113,12 @@ skipped_exercises AS (
             PARTITION BY session_group 
             ORDER BY exercise_order ASC
         ) AS row_num
-    FROM exercise_results
+    FROM "./data/exercise_results.parquet"
     WHERE leave_exercise IS NOT NULL
 ),
 
 all_sessions AS (
-    SELECT DISTINCT session_group FROM exercise_results
+    SELECT DISTINCT session_group FROM "./data/exercise_results.parquet"
 )
 
 SELECT 

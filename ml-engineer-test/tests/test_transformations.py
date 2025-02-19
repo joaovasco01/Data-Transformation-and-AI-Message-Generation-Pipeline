@@ -9,9 +9,9 @@ from message.config import DATA_DIR, QUERIES_DIR
 def mock_data():
     """Create a small mock dataset for testing."""
     data = [
-        {"patient_id": "P1", "patient_name": "John Doe", "patient_age": 30, "pain": 2, "fatigue": 3, "therapy_name": "knee", "session_number": 1, "leave_session": None, "quality": 4, "session_is_nok": 0, "quality_reason_other": 1, "quality_reason_exercises": 1,"quality_reason_my_self_personal": 0, "quality_reason_movement_detection": 1, "quality_reason_tablet": 0,"quality_reason_tablet_and_or_motion_trackers": 0,"quality_reason_easy_of_use": 0,"quality_reason_session_speed": 0,"session_group": "A", "prescribed_repeats": 10, "leave_exercise": "pain", "training_time": 120, "correct_repeats":5, "session_exercise_result_id": 1, "exercise_name": "squat", "wrong_repeats": 5, "exercise_order": 2},
-        {"patient_id": "P1", "patient_name": "John Doe", "patient_age": 30, "pain": 2, "fatigue": 3, "therapy_name": "knee", "session_number": 1, "leave_session": None, "quality": 4, "session_is_nok": 0, "quality_reason_other": 1, "quality_reason_exercises": 1,"quality_reason_my_self_personal": 0, "quality_reason_movement_detection": 1, "quality_reason_tablet": 0,"quality_reason_tablet_and_or_motion_trackers": 0,"quality_reason_easy_of_use": 0,"quality_reason_session_speed": 0,"session_group": "A", "prescribed_repeats": 15, "leave_exercise": "system_problem", "training_time": 150, "correct_repeats":15, "session_exercise_result_id": 2, "exercise_name": "squat", "wrong_repeats": 5, "exercise_order": 1},
-        {"patient_id": "P2", "patient_name": "Jane Smith", "patient_age": 45, "pain": 5, "fatigue": 6, "therapy_name": "shoulder", "session_number": 2, "leave_session": "discomfort", "quality": 3, "session_is_nok": 1, "quality_reason_other": 0, "quality_reason_exercises": 1,"quality_reason_my_self_personal": 0, "quality_reason_movement_detection": 1, "quality_reason_tablet": 0,"quality_reason_tablet_and_or_motion_trackers": 0,"quality_reason_easy_of_use": 0,"quality_reason_session_speed": 0,"session_group": "B", "prescribed_repeats": 20, "leave_exercise": None, "training_time": 300, "correct_repeats":10, "session_exercise_result_id": 3, "exercise_name": "lunges", "wrong_repeats": 1, "exercise_order": 1},  
+        {"session_group": "A","patient_id": "P1", "patient_name": "John Doe", "patient_age": 30, "pain": 2, "fatigue": 3, "therapy_name": "knee", "session_number": 1, "leave_session": None, "quality": 4, "session_is_nok": 0, "quality_reason_other": 1, "quality_reason_exercises": 1,"quality_reason_my_self_personal": 0, "quality_reason_movement_detection": 1, "quality_reason_tablet": 0,"quality_reason_tablet_and_or_motion_trackers": 0,"quality_reason_easy_of_use": 0,"quality_reason_session_speed": 0, "prescribed_repeats": 10, "leave_exercise": "pain", "training_time": 120, "correct_repeats":5, "session_exercise_result_id": 1, "exercise_name": "squat", "wrong_repeats": 5, "exercise_order": 2},
+        {"session_group": "A","patient_id": "P1", "patient_name": "John Doe", "patient_age": 30, "pain": 2, "fatigue": 3, "therapy_name": "knee", "session_number": 1, "leave_session": None, "quality": 4, "session_is_nok": 0, "quality_reason_other": 1, "quality_reason_exercises": 1,"quality_reason_my_self_personal": 0, "quality_reason_movement_detection": 1, "quality_reason_tablet": 0,"quality_reason_tablet_and_or_motion_trackers": 0,"quality_reason_easy_of_use": 0,"quality_reason_session_speed": 0, "prescribed_repeats": 15, "leave_exercise": "system_problem", "training_time": 150, "correct_repeats":15, "session_exercise_result_id": 2, "exercise_name": "squat", "wrong_repeats": 5, "exercise_order": 1},
+        {"session_group": "B","patient_id": "P2", "patient_name": "Jane Smith", "patient_age": 45, "pain": 5, "fatigue": 6, "therapy_name": "shoulder", "session_number": 2, "leave_session": "discomfort", "quality": 3, "session_is_nok": 1, "quality_reason_other": 0, "quality_reason_exercises": 1,"quality_reason_my_self_personal": 0, "quality_reason_movement_detection": 1, "quality_reason_tablet": 0,"quality_reason_tablet_and_or_motion_trackers": 0,"quality_reason_easy_of_use": 0,"quality_reason_session_speed": 0, "prescribed_repeats": 20, "leave_exercise": None, "training_time": 300, "correct_repeats":10, "session_exercise_result_id": 3, "exercise_name": "lunges", "wrong_repeats": 1, "exercise_order": 1},  
     ]
     return pd.DataFrame(data)
 
@@ -248,21 +248,6 @@ def test_exercise_with_most_incorrect(mock_data):
 
     # Check results
     pd.testing.assert_frame_equal(result, expected, check_dtype=False)
-
-
-
-@pytest.fixture
-def mock_skipped_exercises_data():
-    """Mock data for testing `first_exercise_skipped`."""
-    data = [
-        {"session_group": "A", "patient_id": "P1", "exercise_name": "squat", "exercise_order": 2, "leave_exercise": "pain"},
-        {"session_group": "A", "patient_id": "P1", "exercise_name": "pushup", "exercise_order": 1, "leave_exercise": None},  # Not skipped
-        {"session_group": "B", "patient_id": "P2", "exercise_name": "lunges", "exercise_order": 1, "leave_exercise": "tired"},
-        {"session_group": "B", "patient_id": "P2", "exercise_name": "plank", "exercise_order": 2, "leave_exercise": "pain"},
-        {"session_group": "C", "patient_id": "P3", "exercise_name": "jumping_jacks", "exercise_order": 1, "leave_exercise": None},  # Not skipped
-        {"session_group": "C", "patient_id": "P3", "exercise_name": "burpees", "exercise_order": 2, "leave_exercise": "unable_perform"},
-    ]
-    return pd.DataFrame(data)
 
 def test_first_exercise_skipped(mock_data):
     """Test if `first_exercise_skipped` is correctly identified per session."""
