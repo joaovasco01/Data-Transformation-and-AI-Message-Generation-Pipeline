@@ -31,6 +31,12 @@ def transform_features_sql():
 
     query = open_query(Path(QUERIES_DIR, "features.sql"))
 
+    # ✅ Explicitly register `exercise_results`
+    duckdb.register("exercise_results", exercise)
+
+    # ✅ Debugging: Print available tables again
+    print("🔍 Available tables after registration:", duckdb.sql("SHOW TABLES").df())
+
     session = duckdb.sql(query).df()
 
     session.to_parquet(Path(DATA_DIR, "features.parquet"))

@@ -10,7 +10,7 @@ app = typer.Typer()
 def transform():
 
     # Uncomment the function you want to run
-    # transform_features_sql()
+    transform_features_sql()
     # transform_features_py()
 
     return
