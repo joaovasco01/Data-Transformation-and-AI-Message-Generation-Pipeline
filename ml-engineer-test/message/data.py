@@ -21,18 +21,18 @@ def open_query(query_filename: Path, **kwargs) -> str:
     return open(query_filename, "r").read().format(**kwargs)
 
 
-def transform_features_sql():
-    """Loads the exercise results and transforms
+def transform_features_sql(tables_to_register=None):
+    """-Loads the exercise results and transforms
     them into features using the features.sql query.
+        -Allows optional table registration for DuckDB.
     """
-    exercise = pd.read_parquet(
-        Path(DATA_DIR, "exercise_results.parquet")
-    )  # noqa
 
     query = open_query(Path(QUERIES_DIR, "features.sql"))
 
-    # ✅ Explicitly register `exercise_results`
-    #duckdb.register("exercise_results", exercise)
+    # ✅ Register tables if provided
+    if tables_to_register:
+        for table_name, df in tables_to_register:
+            duckdb.register(table_name, df)
 
     session = duckdb.sql(query).df()
 
