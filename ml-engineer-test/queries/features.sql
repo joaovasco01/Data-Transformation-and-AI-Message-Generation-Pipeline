@@ -1,26 +1,26 @@
 WITH base AS (
     SELECT
         session_group,
-        MIN(patient_id) AS patient_id,
-        MIN(patient_name) AS patient_name,  
-        MIN(patient_age) AS patient_age,  
-        MIN(therapy_name) AS therapy_name,  
-        MIN(session_number) AS session_number,  
-        MIN(leave_session) AS leave_session,  
-        MIN(session_is_nok) AS session_is_nok,  
-        MIN(pain) AS pain,  
-        MIN(fatigue) AS fatigue,  
-        MIN(quality) AS quality,
+        ANY_VALUE(patient_id) AS patient_id,
+        ANY_VALUE(patient_name) AS patient_name,  
+        ANY_VALUE(patient_age) AS patient_age,  
+        ANY_VALUE(therapy_name) AS therapy_name,  
+        ANY_VALUE(session_number) AS session_number,  
+        ANY_VALUE(leave_session) AS leave_session,  
+        ANY_VALUE(session_is_nok) AS session_is_nok,  
+        ANY_VALUE(pain) AS pain,  
+        ANY_VALUE(fatigue) AS fatigue,  
+        ANY_VALUE(quality) AS quality,
 
         -- Aggregate quality reasons
-        MAX(quality_reason_movement_detection) AS quality_reason_movement_detection,
-        MAX(quality_reason_my_self_personal) AS quality_reason_my_self_personal,
-        MAX(quality_reason_other) AS quality_reason_other,
-        MAX(quality_reason_exercises) AS quality_reason_exercises,
-        MAX(quality_reason_tablet) AS quality_reason_tablet,
-        MAX(quality_reason_tablet_and_or_motion_trackers) AS quality_reason_tablet_and_or_motion_trackers,
-        MAX(quality_reason_easy_of_use) AS quality_reason_easy_of_use,
-        MAX(quality_reason_session_speed) AS quality_reason_session_speed
+        ANY_VALUE(quality_reason_movement_detection) AS quality_reason_movement_detection,
+        ANY_VALUE(quality_reason_my_self_personal) AS quality_reason_my_self_personal,
+        ANY_VALUE(quality_reason_other) AS quality_reason_other,
+        ANY_VALUE(quality_reason_exercises) AS quality_reason_exercises,
+        ANY_VALUE(quality_reason_tablet) AS quality_reason_tablet,
+        ANY_VALUE(quality_reason_tablet_and_or_motion_trackers) AS quality_reason_tablet_and_or_motion_trackers,
+        ANY_VALUE(quality_reason_easy_of_use) AS quality_reason_easy_of_use,
+        ANY_VALUE(quality_reason_session_speed) AS quality_reason_session_speed
     FROM exercise_results
     GROUP BY session_group
 ),
