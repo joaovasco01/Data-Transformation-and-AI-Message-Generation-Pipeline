@@ -28,9 +28,13 @@ WITH base AS (
 leave_exercise_counts AS (
     SELECT
         session_group,
-        COUNT(CASE WHEN leave_exercise IN (
-            'system_problem', 'other', 'unable_perform', 'technical_issues', 'difficulty', 'pain', 'tired'
-        ) THEN 1 ELSE NULL END) AS leave_exercise_total
+        COUNT(CASE WHEN leave_exercise = 'system_problem' THEN 1 END) AS leave_exercise_system_problem,
+        COUNT(CASE WHEN leave_exercise = 'other' THEN 1 END) AS leave_exercise_other,
+        COUNT(CASE WHEN leave_exercise = 'unable_perform' THEN 1 END) AS leave_exercise_unable_perform,
+        COUNT(CASE WHEN leave_exercise = 'pain' THEN 1 END) AS leave_exercise_pain,
+        COUNT(CASE WHEN leave_exercise = 'tired' THEN 1 END) AS leave_exercise_tired,
+        COUNT(CASE WHEN leave_exercise = 'technical_issues' THEN 1 END) AS leave_exercise_technical_issues,
+        COUNT(CASE WHEN leave_exercise = 'difficulty' THEN 1 END) AS leave_exercise_difficulty
     FROM exercise_results
     GROUP BY session_group
 ),
@@ -38,7 +42,7 @@ leave_exercise_counts AS (
 prescribed_repeats AS (
     SELECT
         session_group,
-        SUM(prescribed_repeats) AS prescribed_repeats_total
+        SUM(prescribed_repeats) AS prescribed_repeats
     FROM exercise_results
     GROUP BY session_group
 ),
@@ -46,7 +50,7 @@ prescribed_repeats AS (
 training_time AS (
     SELECT
         session_group,
-        SUM(training_time) AS training_time_total
+        SUM(training_time) AS training_time
     FROM exercise_results
     GROUP BY session_group
 ),
@@ -54,7 +58,7 @@ training_time AS (
 perc_correct_repeats AS (
     SELECT
         session_group,
-        (SUM(correct_repeats) * 100.0 / NULLIF(SUM(prescribed_repeats), 0)) AS perc_correct_repeats
+        (SUM(correct_repeats) / NULLIF(SUM(correct_repeats + wrong_repeats), 0)) AS perc_correct_repeats
     FROM exercise_results
     GROUP BY session_group
 ),
@@ -91,7 +95,7 @@ ranked_exercises AS (
         total_wrong_repeats,
         ROW_NUMBER() OVER (
             PARTITION BY session_group
-            ORDER BY total_wrong_repeats DESC
+            ORDER BY total_wrong_repeats DESC, RANDOM() -- Ensures a random selection for ties
         ) AS rank_incorrect
     FROM incorrect_counts
 ),
@@ -99,9 +103,12 @@ ranked_exercises AS (
 exercise_with_most_incorrect AS (
     SELECT
         session_group,
-        exercise_name AS exercise_with_most_incorrect
+        CASE 
+            WHEN MAX(total_wrong_repeats) = 0 THEN 'None'  -- If all incorrect counts are 0, return 'None'
+            ELSE MAX(CASE WHEN rank_incorrect = 1 THEN exercise_name END)
+        END AS exercise_with_most_incorrect
     FROM ranked_exercises
-    WHERE rank_incorrect = 1
+    GROUP BY session_group
 ),
 
 skipped_exercises AS (
@@ -145,10 +152,17 @@ SELECT
     b.quality_reason_session_speed,
 
     -- Aggregated Features
-    COALESCE(l.leave_exercise_total, 0) AS leave_exercise_total,
-    COALESCE(pr.prescribed_repeats_total, 0) AS prescribed_repeats_total,
-    COALESCE(tt.training_time_total, 0) AS training_time_total,
-    COALESCE(pcr.perc_correct_repeats, 0) AS perc_correct_repeats,
+    COALESCE(l.leave_exercise_system_problem, 0) AS leave_exercise_system_problem,
+    COALESCE(l.leave_exercise_other, 0) AS leave_exercise_other,
+    COALESCE(l.leave_exercise_unable_perform, 0) AS leave_exercise_unable_perform,
+    COALESCE(l.leave_exercise_pain, 0) AS leave_exercise_pain,
+    COALESCE(l.leave_exercise_tired, 0) AS leave_exercise_tired,
+    COALESCE(l.leave_exercise_technical_issues, 0) AS leave_exercise_technical_issues,
+    COALESCE(l.leave_exercise_difficulty, 0) AS leave_exercise_difficulty,
+
+    COALESCE(pr.prescribed_repeats, 0) AS prescribed_repeats,
+    COALESCE(tt.training_time, 0) AS training_time,
+    COALESCE(pcr.perc_correct_repeats, NULL) AS perc_correct_repeats,
     COALESCE(ne.number_exercises, 0) AS number_exercises,
     COALESCE(nd.number_of_distinct_exercises, 0) AS number_of_distinct_exercises,
     COALESCE(inc.exercise_with_most_incorrect, NULL) AS exercise_with_most_incorrect,

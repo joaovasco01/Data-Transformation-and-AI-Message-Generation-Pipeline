@@ -59,8 +59,8 @@ def test_session_transformation(mock_data):
     pd.testing.assert_frame_equal(result, expected, check_dtype=False)
 
 
-def test_prescribed_repeats_total(mock_data):
-    """Test if prescribed_repeats_total is correctly summed."""
+def test_prescribed_repeats(mock_data):
+    """Test if prescribed_repeats is correctly summed."""
     
     # Initialize DuckDB
     con = duckdb.connect()
@@ -74,11 +74,11 @@ def test_prescribed_repeats_total(mock_data):
     # Run the SQL query
     result = con.execute(sql_query).fetchdf()
     # ✅ Keep only the relevant columns for this test
-    result = result[["session_group", "prescribed_repeats_total"]]
+    result = result[["session_group", "prescribed_repeats"]]
     # Expected output (Summing prescribed_repeats per session_group)
     expected = pd.DataFrame({
         "session_group": ["A", "B"],
-        "prescribed_repeats_total": [25, 20]  # A (10+15), B (20)
+        "prescribed_repeats": [25, 20]  # A (10+15), B (20)
     })
     
     # ✅ Sort before comparison
@@ -89,8 +89,8 @@ def test_prescribed_repeats_total(mock_data):
     pd.testing.assert_frame_equal(result, expected, check_dtype=False)
 
 
-def test_training_time_total(mock_data):
-    """Test if training_time_total is correctly summed per session_group."""
+def test_training_time(mock_data):
+    """Test if training_time is correctly summed per session_group."""
     
     # Initialize DuckDB
     con = duckdb.connect()
@@ -104,12 +104,12 @@ def test_training_time_total(mock_data):
     # Run the SQL query
     result = con.execute(sql_query).fetchdf()
     # ✅ Keep only the relevant columns for this test
-    result = result[["session_group", "training_time_total"]]
+    result = result[["session_group", "training_time"]]
 
     # Expected output (Summing `training_time` per session_group)
     expected = pd.DataFrame({
         "session_group": ["A", "B"],
-        "training_time_total": [270, 300]  # A (120+150), B (300)
+        "training_time": [270, 300]  # A (120+150), B (300)
     })
 
     # ✅ Sort before comparison
@@ -141,7 +141,7 @@ def test_perc_correct_repeats(mock_data):
     # Expected output
     expected = pd.DataFrame({
         "session_group": ["A", "B"],
-        "perc_correct_repeats": [80.0, 50.0]
+        "perc_correct_repeats": [0.666666666666666, 0.9090909090909091]
     })
 
     # ✅ Fix: Sort both DataFrames before comparing
