@@ -1,10 +1,10 @@
 import os
-from message.prompt_manager import get_scenario_prompt
+from message.prompt_manager import get_scenario_prompt, load_prompt
 import typer
 from message.data import transform_features_py  # noqa
 from message.data import transform_features_sql  # noqa
 from message.data import fetch_session_data
-from message.model import ChatModel, OpenAIKeys
+from message.model import generate_message
 
 app = typer.Typer()
 
@@ -18,15 +18,6 @@ def transform():
 
     return
 
-
-# Load prompt from files
-def load_prompt(file_name: str) -> str:
-    """Loads a prompt file from the prompts directory."""
-    prompts_dir = os.path.join(os.path.dirname(__file__), "..", "prompts")
-    file_path = os.path.join(prompts_dir, file_name)
-
-    with open(file_path, "r", encoding="utf-8") as f:
-        return f.read()
 
 @app.command()
 def get_message(session_group: str) -> str:
@@ -50,23 +41,5 @@ def get_message(session_group: str) -> str:
 
     # 4️⃣ Generate AI message
     response = generate_message(user_prompt)
-
-    return response
-
-
-def generate_message(user_prompt: str) -> str:
-    """Calls OpenAI GPT model to generate a session message."""
-    chat_model = ChatModel()
-    
-    system_prompt = load_prompt("system_prompt.txt")
-
-    response = chat_model.get_completion(
-        temperature=0.7,
-        model="gpt-4-turbo-preview",
-        messages=[
-            {OpenAIKeys.ROLE: "system", OpenAIKeys.CONTENT: system_prompt},
-            {OpenAIKeys.ROLE: "user", OpenAIKeys.CONTENT: user_prompt},
-        ],
-    )
 
     return response

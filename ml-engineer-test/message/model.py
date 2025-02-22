@@ -1,3 +1,4 @@
+from message.prompt_manager import load_prompt
 import openai
 from message.config import get_settings
 
@@ -31,3 +32,20 @@ class ChatModel:
         chat_completion = openai.ChatCompletion.create(**kwargs)
 
         return chat_completion.choices[0].message[OpenAIKeys.CONTENT]
+
+def generate_message(user_prompt: str) -> str:
+    """Calls OpenAI GPT model to generate a session message."""
+    chat_model = ChatModel()
+    
+    system_prompt = load_prompt("system_prompt.txt")
+
+    response = chat_model.get_completion(
+        temperature=0.7,
+        model="gpt-4-turbo-preview",
+        messages=[
+            {OpenAIKeys.ROLE: "system", OpenAIKeys.CONTENT: system_prompt},
+            {OpenAIKeys.ROLE: "user", OpenAIKeys.CONTENT: user_prompt},
+        ],
+    )
+
+    return response
