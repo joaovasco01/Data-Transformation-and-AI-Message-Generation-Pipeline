@@ -1,10 +1,13 @@
 from message.prompt_manager import load_prompt
 import openai
+import asyncio
+import random
+import logging
+from openai.error import RateLimitError, APIError, Timeout, InvalidRequestError
 from message.config import get_settings
 import tiktoken
-import logging
-
 # OpenAI pricing (adjust if model changes)
+MAX_RETRIES = 3
 PRICING = {
         "gpt-4-turbo-preview": {"input": 0.01 / 1000, "output": 0.03 / 1000},  # $0.01 per 1k input tokens, $0.03 per 1k output tokens
     }
@@ -16,12 +19,11 @@ class OpenAIKeys(str):
 
 class ChatModel:
 
-
     def __init__(self):
         settings = get_settings()
         openai.api_key = settings.OPENAI_API_KEY
-
-    def get_completion(
+        
+    async def get_completion(
         self,
         **kwargs,
     ) -> str:
@@ -35,10 +37,23 @@ class ChatModel:
         str
             The chat completion response.
         """
+        
+        for attempt in range(MAX_RETRIES):
+            try:
+                chat_completion = await openai.ChatCompletion.acreate(**kwargs)
+                return chat_completion.choices[0].message[OpenAIKeys.CONTENT]
 
-        chat_completion = openai.ChatCompletion.create(**kwargs)
-
-        return chat_completion.choices[0].message[OpenAIKeys.CONTENT]
+            except RateLimitError:
+                if attempt < MAX_RETRIES - 1:  # If it's not the last attempt
+                    wait_time = 2 ** attempt + random.uniform(0, 1)  # Exponential backoff
+                    self.logger.warning(f"Rate limit hit! Retrying in {wait_time:.2f} seconds...")
+                    await asyncio.sleep(wait_time)  # Async sleep to wait before retrying
+                else:
+                    self.logger.error("Max retries exceeded for rate limits.")
+                    raise  # If max retries exceeded, raise the error
+            except (APIError, Timeout) as e:
+                self.logger.error(f"OpenAI API error: {e}")
+                raise  # Re-raise critical API errors
     @staticmethod
     def count_tokens(text: str, model="gpt-4-turbo-preview") -> int:
             """Counts tokens in a given text."""
@@ -53,13 +68,13 @@ class ChatModel:
             return input_cost + output_cost
 
 
-def generate_message(user_prompt: str) -> str:
+async def generate_message(user_prompt: str) -> str:
     """Calls OpenAI GPT model to generate a session message."""
     chat_model = ChatModel()
     
     system_prompt = load_prompt("system_prompt.txt")
 
-    response = chat_model.get_completion(
+    response = await chat_model.get_completion(
         temperature=0.7,
         model="gpt-4-turbo-preview",
         messages=[

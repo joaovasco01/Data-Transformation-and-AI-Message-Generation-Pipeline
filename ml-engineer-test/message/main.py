@@ -20,7 +20,7 @@ def transform():
 
 
 @app.command()
-def get_message(session_group: str) -> str:
+async def get_message(session_group: str) -> str:
     """
     Retrieves session details for a given session_group and generates an AI-crafted message.
     """
@@ -28,7 +28,7 @@ def get_message(session_group: str) -> str:
     # 1️⃣ Fetch session details
     session_context = fetch_session_data(session_group)
     if not session_context:
-        print(f"⚠️ No session data found for session_group: {session_group}")
+        print(f"No session data found for session_group: {session_group}")
         return ""
 
     # 2️⃣ Load & format scenario description
@@ -40,6 +40,6 @@ def get_message(session_group: str) -> str:
     user_prompt = user_prompt_template.format(**session_context)
 
     # 4️⃣ Generate AI message
-    response = generate_message(user_prompt)
+    response = await generate_message(user_prompt)
 
     return response
