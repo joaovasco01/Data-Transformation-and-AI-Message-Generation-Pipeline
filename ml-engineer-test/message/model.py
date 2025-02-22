@@ -1,8 +1,13 @@
 from message.prompt_manager import load_prompt
 import openai
 from message.config import get_settings
+import tiktoken
+import logging
 
-
+# OpenAI pricing (adjust if model changes)
+PRICING = {
+        "gpt-4-turbo-preview": {"input": 0.01 / 1000, "output": 0.03 / 1000},  # $0.01 per 1k input tokens, $0.03 per 1k output tokens
+    }
 class OpenAIKeys(str):
     ROLE = "role"
     CONTENT = "content"
@@ -10,6 +15,8 @@ class OpenAIKeys(str):
 
 
 class ChatModel:
+
+
     def __init__(self):
         settings = get_settings()
         openai.api_key = settings.OPENAI_API_KEY
@@ -32,6 +39,19 @@ class ChatModel:
         chat_completion = openai.ChatCompletion.create(**kwargs)
 
         return chat_completion.choices[0].message[OpenAIKeys.CONTENT]
+    @staticmethod
+    def count_tokens(text: str, model="gpt-4-turbo-preview") -> int:
+            """Counts tokens in a given text."""
+            enc = tiktoken.encoding_for_model(model)
+            return len(enc.encode(text))
+
+    @staticmethod
+    def estimate_cost(input_tokens: int, output_tokens: int, model="gpt-4-turbo-preview") -> float:
+            """Estimates the cost of an OpenAI API call."""
+            input_cost = input_tokens * PRICING[model]["input"]
+            output_cost = output_tokens * PRICING[model]["output"]
+            return input_cost + output_cost
+
 
 def generate_message(user_prompt: str) -> str:
     """Calls OpenAI GPT model to generate a session message."""
@@ -47,5 +67,18 @@ def generate_message(user_prompt: str) -> str:
             {OpenAIKeys.ROLE: "user", OpenAIKeys.CONTENT: user_prompt},
         ],
     )
-
+    group_tokens(response,system_prompt,user_prompt,chat_model)
     return response
+
+
+def group_tokens(response: str,system_prompt: str,user_prompt: str, chat_model: ChatModel):
+    output_tokens = chat_model.count_tokens(response)
+    input_tokens = chat_model.count_tokens(system_prompt) + chat_model.count_tokens(user_prompt)
+
+    # 8️⃣ Estimate cost
+    estimated_price = chat_model.estimate_cost(input_tokens, output_tokens)
+    
+    logging.info(f"Input Tokens: {input_tokens}, Output Tokens: {output_tokens}")
+    logging.info(f"Estimated Cost: ${estimated_price:.6f}")
+    
+    return
