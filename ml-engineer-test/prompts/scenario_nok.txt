@@ -1,0 +1,7 @@
+Completed {number_exercises} exercises but struggled the most with {exercise_with_most_incorrect}.
+
+Pain level: {pain}/10. Fatigue level: {fatigue}/10. Quality rating: {quality}/5.
+
+{first_exercise_skipped} was skipped during the session.
+
+{leave_session} (if applicable) may have impacted their progress.

@@ -1,0 +1,7 @@
+Hey {patient_name}, 
+
+You just completed your {therapy_name} session #{session_number}.
+
+{scenario_description}
+
+How do you feel about your session today?
