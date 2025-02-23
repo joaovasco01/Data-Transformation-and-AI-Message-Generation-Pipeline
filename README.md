@@ -106,43 +106,42 @@ OPENAI_API_KEY=your-openai-key-here
 ### **💡 Key Objectives**
 ✔️ **Convert raw exercise records into structured session-level features**  
 ✔️ **Compute essential performance metrics** (e.g., `perc_correct_repeats`, `training_time`, `quality_rating`)  
-✔️ **Identify skipped exercises & the most incorrect movements**  
+✔️ **Identify skipped exercises & the most incorrect movements** 
+✔️ **Create unit tests for all transformations done**  
 ✔️ **Validate alignment with `features_expected.parquet`**  
 
 ---
 
-## **🛠️ Transformation Pipeline**
+## **🛠 Transformation Pipeline Overview**  
 
-### **📌 Step 1: Session-Level Aggregation**
-Each row in `exercise_results` represents **one exercise performed in a session**. To transform it into **one row per session**, we:
+### **1. Data Aggregation & Grouping**  
+- Collected **patient session data**.  
+- Grouped by **`session_group`** to unify related exercises into a single record.  
 
-- **Group by `session_group`**
-- Use **`ANY_VALUE()`** for static session-wide attributes:
-  - `patient_id`, `therapy_name`, `session_number`, `pain`, `fatigue`, `quality`
+### **2. Feature Engineering**  
+- Created new **session-level metrics**:  
+  - **`leave_exercise_*`** (number of left exercises).
+  - **`prescribed_repeats*`** (number of repetitions supposed to perform). 
+  - **`training_time`** (total session duration).  
+  - **`perc_correct_repeats`** (accuracy percentage).  
+  - **`number_exercises`** (total exercises performed).  
+  - **`number_of_distinct_exercises`** (unique exercises).  
 
-### **📌 Step 2: Compute Performance Metrics**
-- **Total prescribed repetitions:** `SUM(prescribed_repeats)`
-- **Total training time:** `SUM(training_time)`
-- **% Correct Repeats:**
-  ```sql
-  (SUM(correct_repeats) / NULLIF(SUM(correct_repeats + wrong_repeats), 0)) AS perc_correct_repeats
-  ```
-- **Number of exercises performed:** `COUNT(*)`
-- **Distinct exercises performed:** `COUNT(DISTINCT exercise_name)`
+### **3. Handling Missing & Edge Cases**  
+- Used **`COALESCE`** to fill missing values.  
+- Ensured divisions avoid **`NULL` errors** using **`NULLIF`** in calculations.  
 
-### **📌 Step 3: Identify Key Exercises**
-- **Exercise with most incorrect movements:**
-  - Uses `ROW_NUMBER()` to **select the exercise with the highest mistakes**
-  - Uses `RANDOM()` for **tie-breaking**
-- **First skipped exercise:**
-  - Uses `ORDER BY exercise_order ASC` to **identify the first skipped exercise**.
+### **4. Ranking & Selection**  
+- Identified **`exercise_with_most_incorrect`** using **ranking logic**.  
+- **Randomly selected** an exercise in case of ties.  
 
-### **📌 Step 4: Count `leave_exercise` Reasons**
-- Counts occurrences of `leave_exercise` for each session:
-  ```sql
-  COUNT(CASE WHEN leave_exercise = 'pain' THEN 1 END) AS leave_exercise_pain
-  COUNT(CASE WHEN leave_exercise = 'technical_issues' THEN 1 END) AS leave_exercise_technical_issues
-  ```
+### **5. Identifying Skipped Exercises**  
+- Tracked **`first_exercise_skipped`** by ordering skipped exercises.  
+- Selected the **first occurrence** using **`ROW_NUMBER()`**.  
+
+### **6. Data Merging & Final Assembly**  
+- **Merged all derived metrics** using **`LEFT JOIN`**.  
+- Ensured **comprehensive session information** was retained.  
 
 ---
 
@@ -166,6 +165,7 @@ def transform():
 To ensure correctness, we:
 ✔ **Compare `features.parquet` vs `features_expected.parquet` using Pandas**  
 ✔ **Validate key aggregations using unit tests (`pytest`)**  
+✔ **Unit tests where done for all SQL Queries (`test_transformations.py`)**  
 
 
 ### **📊 Jupyter Notebook Comparisons**
