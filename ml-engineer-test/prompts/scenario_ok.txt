@@ -1,0 +1,5 @@
+Successfully performed {number_exercises} exercises ({number_of_distinct_exercises} unique movements) with {perc_correct_repeats}% accuracy.
+
+Pain level: {pain}/10. Fatigue level: {fatigue}/10. Quality rating: {quality}/5.
+
+Encourage them to stay consistent and ask an open-ended question about their experience.
