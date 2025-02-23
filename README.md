@@ -72,28 +72,33 @@ Merging was done via **separate PRs per feature branch** to keep changes modular
 ---
 
 ## **⚙️ Setup Instructions**
-### **1️⃣ Clone the repository**
+### **Clone the repository**
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/joaovasco01/sword-ml-engineer-challenge.git
 cd ml-engineer-test
 ```
 
-### **2️⃣ Create & Activate Virtual Environment**
+### **Create & Activate Virtual Environment**
 ```bash
 make venv  # Automatically creates and activates a virtual environment
 source venv/bin/activate 
 ```
 
-### **3️⃣ Install Dependencies**
-```bash
-pip install -r requirements.txt
-```
+### **Install Dependencies**
+- **Install required packages:**
+  ```bash
+  pip install pytest  # Required for running tests
+  pip install tiktoken  # Needed for counting tokens for pricing
+  pip install certifi  # Required for running async operations in Jupyter Notebook
+  ```
 
-### **4️⃣ Setup Environment Variables**
+- **Run tests:**
+  ```bash
+  python -m pytest tests/test_transformations.py
+  ```
+
+### **Setup Environment Variables**
 Create a `.env` file in the project root:
-```bash
-touch .env
-```
 Add your **OpenAI API Key** inside `.env`:
 ```
 OPENAI_API_KEY=your-openai-key-here
@@ -110,7 +115,6 @@ OPENAI_API_KEY=your-openai-key-here
 ✔️ **Create unit tests for all transformations done**  
 ✔️ **Validate alignment with `features_expected.parquet`**  
 
----
 
 ## **🛠 Transformation Pipeline Overview**  
 
@@ -143,7 +147,6 @@ OPENAI_API_KEY=your-openai-key-here
 - **Merged all derived metrics** using **`LEFT JOIN`**.  
 - Ensured **comprehensive session information** was retained.  
 
----
 
 ### **📝 SQL Transformation**
 Stored in **`queries/features.sql`**, executed via **DuckDB**.
@@ -159,7 +162,6 @@ def transform():
     transform_features_sql(tables_to_register=[("exercise_results", exercise_df)])
 ```
 
----
 
 ### **🔍 Validation & Testing**
 To ensure correctness, we:
