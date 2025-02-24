@@ -8,13 +8,11 @@
 4. [Setup Instructions](#setup-instructions)
 5. [Data Transformation](#data-transformation)
 6. [AI Message Generation](#ai-message-generation)
-7. [Running the Pipeline](#running-the-pipeline)
-8. [Testing](#testing)
-9. [Future Improvements](#future-improvements)
+7. [Future Improvements](#future-improvements)
 
 ---
 
-## **📌 Project Overview**
+## 📌 Project Overview
 This project automates **patient follow-up messaging** based on **session performance data** by leveraging:
 - **Data Transformation:** Aggregating raw session data (`exercise_results.parquet`) into a structured format using **DuckDB & SQL**.
 - **AI Message Generation:** Generating **personalized messages** for patients using **OpenAI GPT-4**.
@@ -194,9 +192,7 @@ print("Columns with differences:", differences)
 ✔️ **Incorporate retry mechanisms** for OpenAI API rate limits & error handling.
 ✔️ **Token usage & cost estimation (EXTRA)** for API calls.  
 
----
-
-## **🛠 Implementation Overview**
+### **🛠 Implementation Overview**
 
 ### **Fetching & Structuring Session Data**
 - Retrieved **patient session details** using `fetch_session_data(session_group)`.  
@@ -295,4 +291,48 @@ print("Columns with differences:", differences)
     I'm curious, what's been the most rewarding part of this journey for you so far?
     ```
 
+## 🚀 Future Considerations
 
+While the current implementation provides **automated AI-generated messages** and **session-level insights**, there are several areas for **scalability and improvement**:
+
+### **🧠 1️⃣ Storing Context of Previous Sessions (RAG)**
+- Implement a **Retrieval-Augmented Generation (RAG)** approach to **store patient session history** in a database.
+- **Why?** This would allow AI to **reference past patient interactions**, ensuring **more personalized and context-aware messages**.
+- **How?** Store session summaries in a database and pass relevant past sessions into the prompt dynamically.
+
+### **🤖 2️⃣ Message Validation Agent**
+- Introduce a **secondary validation agent** to review AI-generated messages.
+- If the validation agent **disagrees with the message**, trigger a **second attempt** (up to **2 retries**).
+- **Goal?** Ensure messages are **clinically accurate**, **context-aware**, and **follow PT guidelines** before being sent.
+
+### **🔗 3️⃣ LangChain Integration for AI Workflow**
+- **Enhance AI automation** by structuring the **AI messaging process** as a **multi-step agent-based workflow**.
+- **LangChain** would allow:
+  - **Dynamic prompt chaining** (e.g., fetching past session context before generating a message)
+  - **External tool integration** (e.g., checking patient progress trends before crafting a message)
+  - **Scalability for future enhancements**, such as **auto-adjusting tone** based on patient response patterns.
+
+By implementing these enhancements, the pipeline will **improve personalization, validation, and automation**, ensuring **higher-quality patient engagement** with minimal PT intervention.
+
+---
+
+## **📝 Additional Reflections**
+
+This project was an excellent opportunity to **combine data engineering with AI-driven communication**, tackling **real-world challenges** faced by physical therapists. 
+
+One of the most interesting aspects was handling **session-level aggregation and AI message structuring** to ensure both **accuracy and usability**. The **balance between data precision and conversational AI** was a fascinating problem to solve, making sure the AI-generated messages felt **natural, engaging, and useful**.
+
+Beyond technical implementation, this challenge reinforced the value of **scalability, automation, and structured engineering workflows**. Exploring **LangChain, RAG-based memory, and AI validation agents** as future improvements would elevate this system even further.
+
+## **🤝 Contributing & Contact**
+
+This repository was created as part of a **technical assessment** and is not currently open for external contributions. However, I’m always open to **discussions, feedback, and suggestions** to improve the approach.
+
+If you have any questions, feedback, or just want to chat about the project, feel free to reach out:
+
+- **👤 Name**: João Vasco Almeida Sobral Siborro Reis  
+- **📧 Email**: [joaovascoscp@gmail.com](mailto:joaovascoscp@gmail.com)  
+- **🔗 LinkedIn**: [João Vasco](https://www.linkedin.com/in/joão-vasco-9a50331a6/)  
+- **🐙 GitHub**: [joaovasco01](https://github.com/joaovasco01)  
+
+Thanks for checking out my work!
