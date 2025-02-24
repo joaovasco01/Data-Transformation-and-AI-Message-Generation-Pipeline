@@ -24,7 +24,6 @@ The goal is to:
 ✔️ **Reduce manual workload** by automating messaging  
 
 ---
-##👤
 ## Repository Structure
 ```
 ml-engineer-test/
@@ -184,7 +183,7 @@ print("Columns with differences:", differences)
 
 ---
 
-##AI Message Generation
+## AI Message Generation
 
 ### **🎯 Goal**
 ✔️ **Automate the generation of AI-crafted messages** for physical therapy patients.  
@@ -294,7 +293,7 @@ print("Columns with differences:", differences)
 
 ---
 
-##Future Considerations
+## Future Considerations
 
 While the current implementation provides **automated AI-generated messages** and **session-level insights**, there are several areas for **scalability and improvement**:
 
@@ -319,7 +318,7 @@ By implementing these enhancements, the pipeline will **improve personalization,
 
 ---
 
-##Additional Reflections
+## Additional Reflections
 
 This project was an excellent opportunity to **combine data engineering with AI-driven communication**, tackling **real-world challenges** faced by physical therapists. 
 
