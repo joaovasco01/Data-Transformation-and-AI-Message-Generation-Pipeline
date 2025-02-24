@@ -46,10 +46,10 @@ ml-engineer-test/
 │   ├── data-transformation.ipynb   # Testing for Question 1
 │   ├── message-generation.ipynb    # Testing for Question 2
 │── queries/                        # SQL queries for DuckDB
+│   ├── features.sql                
 │── tests/                          # Unit tests for queries
 │   ├── test_transformations.py 
 │── Makefile                        # Command-line automation
-│── requirements.txt                # Dependencies
 │── README.md                       # Project documentation
 ```
 
