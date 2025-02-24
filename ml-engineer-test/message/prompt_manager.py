@@ -10,6 +10,6 @@ def load_prompt(file_name: str) -> str:
 
 def get_scenario_prompt(session_context: dict) -> str:
     """Loads and formats the appropriate scenario template."""
-    file_name = "scenario_nok.txt" if session_context["session_is_nok"] == 1 else "scenario_ok.txt"
+    file_name = "scenario_nok.txt" if session_context["session_is_nok"] == True else "scenario_ok.txt"
     template = load_prompt(file_name)
     return template.format(**session_context)

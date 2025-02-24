@@ -79,7 +79,7 @@ def fetch_session_data(session_group: str) -> dict:
         "patient_name": session_info.get("patient_name", "Unknown"),
         "therapy_name": session_info.get("therapy_name", "Unknown Therapy"),
         "session_number": session_info.get("session_number", None),
-        "session_is_nok": session_info.get("session_is_nok", 0),
+        "session_is_nok": session_info.get("session_is_nok", True),
         "pain": f"{session_info.get('pain', 0)}",
         "fatigue": f"{session_info.get('fatigue', 0)}",
         "quality": f"{session_info.get('quality', 5)}",
@@ -87,5 +87,7 @@ def fetch_session_data(session_group: str) -> dict:
         "exercise_with_most_incorrect": session_info.get("exercise_with_most_incorrect", "N/A"),
         "first_exercise_skipped": session_info.get("first_exercise_skipped", "N/A"),
         "leave_session": session_info.get("leave_session", "No early leave"),
+        "number_of_distinct_exercises": session_info.get("number_of_distinct_exercises", "N/A"),
+        "perc_correct_repeats": session_info.get("perc_correct_repeats", "N/A"),
     }
 
