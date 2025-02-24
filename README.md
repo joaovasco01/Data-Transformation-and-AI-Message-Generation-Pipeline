@@ -8,7 +8,8 @@
 4. [Setup Instructions](#setup-instructions)
 5. [Data Transformation](#data-transformation)
 6. [AI Message Generation](#ai-message-generation)
-7. [Future Improvements](#future-improvements)
+7. [Future Considerations](#future-considerations)
+8. [Additional Reflections](#additional-reflections)
 
 ---
 
@@ -23,8 +24,8 @@ The goal is to:
 ✔️ **Reduce manual workload** by automating messaging  
 
 ---
-
-## **👤 Repository Structure**
+##👤
+## Repository Structure
 ```
 ml-engineer-test/
 │── message/                        # Core application logic
@@ -55,7 +56,7 @@ ml-engineer-test/
 
 ---
 
-## **🌱 Branching Strategy**
+## Branching Strategy
 This project follows a **feature-branch workflow**:
 
 | Branch                          | Purpose                                   |
@@ -69,7 +70,7 @@ Merging was done via **separate PRs per feature branch** to keep changes modular
 
 ---
 
-## **⚙️ Setup Instructions**
+## Setup Instructions
 ### **Clone the repository**
 ```bash
 git clone https://github.com/joaovasco01/sword-ml-engineer-challenge.git
@@ -104,7 +105,7 @@ OPENAI_API_KEY=your-openai-key-here
 
 ---
 
-## **🏋️ Data Transformation Summary**
+## Data Transformation Summary
 
 ### **💡 Key Objectives**
 ✔️ **Convert raw exercise records into structured session-level features**  
@@ -183,7 +184,7 @@ print("Columns with differences:", differences)
 
 ---
 
-## **💬 AI Message Generation**
+##AI Message Generation
 
 ### **🎯 Goal**
 ✔️ **Automate the generation of AI-crafted messages** for physical therapy patients.  
@@ -291,7 +292,9 @@ print("Columns with differences:", differences)
     I'm curious, what's been the most rewarding part of this journey for you so far?
     ```
 
-## 🚀 Future Considerations
+---
+
+##Future Considerations
 
 While the current implementation provides **automated AI-generated messages** and **session-level insights**, there are several areas for **scalability and improvement**:
 
@@ -316,7 +319,7 @@ By implementing these enhancements, the pipeline will **improve personalization,
 
 ---
 
-## **📝 Additional Reflections**
+##Additional Reflections
 
 This project was an excellent opportunity to **combine data engineering with AI-driven communication**, tackling **real-world challenges** faced by physical therapists. 
 
