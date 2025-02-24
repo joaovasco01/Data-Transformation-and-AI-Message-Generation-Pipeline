@@ -184,3 +184,115 @@ print("Columns with differences:", differences)
 ```
 
 ---
+
+## **💬 AI Message Generation**
+
+### **🎯 Goal**
+✔️ **Automate the generation of AI-crafted messages** for physical therapy patients.  
+✔️ **Ensure high personalization** based on session performance & patient context.  
+✔️ **Mimic human-written messages** while adhering to tone & structure guidelines.  
+✔️ **Incorporate retry mechanisms** for OpenAI API rate limits & error handling.
+✔️ **Token usage & cost estimation (EXTRA)** for API calls.  
+
+---
+
+## **🛠 Implementation Overview**
+
+### **Fetching & Structuring Session Data**
+- Retrieved **patient session details** using `fetch_session_data(session_group)`.  
+- Ensured a **well-structured dictionary** containing:  
+  - **Patient & session metadata** (e.g., `patient_name`, `therapy_name`, `session_number`).  
+  - **Performance metrics** (e.g., `pain`, `fatigue`, `quality_rating`).  
+  - **Exercise-specific insights** (`exercise_with_most_incorrect`, `first_exercise_skipped`).  
+
+### **Scenario-Based Prompt Selection**
+- Implemented **dynamic prompt selection** based on session status, basing the variables as personalizations on the text:
+  - **OK Sessions:** Reinforce motivation, collect feedback, and guide future sessions.  
+  - **NOK Sessions:** Downplay technical issues, acknowledge struggles, and ask open-ended questions.  
+- Loaded & formatted **scenario prompts dynamically**:
+  ```python
+  session_context["scenario_description"] = get_scenario_prompt(session_context)
+  ```
+
+### **Message Personalization & Prompt Engineering**
+- Leveraged **few-shot examples** to fine-tune AI message outputs.  
+- Structured prompts following a **predefined system template**:  
+  - **Conversational & empathetic tone**.  
+  - **Avoid redundancy, clinical jargon, or formalities**.  
+  - **Break messages into readable segments**.  
+- Loaded & formatted the **user prompt template**:
+  ```python
+  user_prompt_template = load_prompt("user_prompt.txt")
+  user_prompt = user_prompt_template.format(**session_context)
+  ```
+
+### **AI Message Generation**
+- Integrated **OpenAI GPT-4 Turbo API** for text generation.
+- Set **temperature = 0.7 to introduce controlled randomness**, ensuring that even if a session is exactly the same, the generated message varies slightly making it feel more natural and human-like. 
+- Implemented robust **error handling & retry mechanisms** for API rate limits using exponential backoff to ensure reliability in asynchronous API calls:
+  ```python
+  for attempt in range(MAX_RETRIES):
+      try:
+          chat_completion = await openai.ChatCompletion.acreate(**kwargs)
+          return chat_completion.choices[0].message[OpenAIKeys.CONTENT]
+      except RateLimitError:
+          if attempt < MAX_RETRIES - 1:
+              wait_time = 2 ** attempt + random.uniform(0, 1)
+              await asyncio.sleep(wait_time)  
+          else:
+              raise  
+  ```
+
+### **Token Optimization & Cost Estimation**
+- Implemented **token counting & cost estimation** for API usage monitoring, to be able to understand pricing:
+  ```python
+  def count_tokens(text: str, model="gpt-4-turbo-preview") -> int:
+      enc = tiktoken.encoding_for_model(model)
+      return len(enc.encode(text))
+
+  def estimate_cost(input_tokens: int, output_tokens: int, model="gpt-4-turbo-preview") -> float:
+      input_cost = input_tokens * PRICING[model]["input"]
+      output_cost = output_tokens * PRICING[model]["output"]
+      return input_cost + output_cost
+  ```
+
+### **Message Generation API Execution**
+- Final message generation pipeline executed asynchronously:
+  ```python
+  @app.command()
+  async def get_message(session_group: str) -> str:
+      session_context = fetch_session_data(session_group)
+      if not session_context:
+          return ""
+      session_context["scenario_description"] = get_scenario_prompt(session_context)
+      user_prompt = load_prompt("user_prompt.txt").format(**session_context)
+      return await generate_message(user_prompt)
+  ```
+
+- To test message generation, open `message-generation.ipynb` and run it with two different sessions:  
+
+  - **NOK (Needs Improvement)**:  
+    ```
+    Hey Taylor,
+
+    Great job finishing your shoulder session #6! 🌟 You nailed those 8 exercises, which is fantastic. I see the shoulder abduction gave you a bit of a challenge. That's totally okay; those movements can be tough, especially as we're building up strength and flexibility.
+
+    Noticing your pain at a 6 and fatigue at a 4, it sounds like you're pushing through, but let's keep an eye on that. We want to ensure we're challenging ourselves without overdoing it. Your overall quality rating is solid, so you're definitely on the right track!
+
+    Given the struggle with shoulder abduction, let's focus on technique next time. Sometimes, a slight adjustment can make a big difference in how an exercise feels. Remember, it's all part of the process.
+
+    How do you feel about your session today?
+    ```
+
+  - **OK (Successful Session)**:  
+    ```
+    Hey Michael,
+
+    Wow, session #166 under your belt - that's incredible! Your dedication is truly paying off, and those numbers are looking sharp. 🌟 With such high accuracy, you're really mastering the movements, and it's great to see your pain and fatigue levels staying low. That's a sweet spot you want to maintain.
+
+    Staying consistent is key, and you're nailing it. Each session builds on the last, and you're proving just how much progress can be made with steady effort.
+
+    I'm curious, what's been the most rewarding part of this journey for you so far?
+    ```
+
+
