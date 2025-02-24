@@ -104,7 +104,7 @@ OPENAI_API_KEY=your-openai-key-here
 
 ---
 
-## Data Transformation Summary
+## Data Transformation
 
 ### **💡 Key Objectives**
 ✔️ **Convert raw exercise records into structured session-level features**  
