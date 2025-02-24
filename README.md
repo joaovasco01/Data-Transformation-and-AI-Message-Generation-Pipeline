@@ -12,7 +12,7 @@
 
 ---
 
-## 📌 Project Overview
+## Project Overview
 This project automates **patient follow-up messaging** based on **session performance data** by leveraging:
 - **Data Transformation:** Aggregating raw session data (`exercise_results.parquet`) into a structured format using **DuckDB & SQL**.
 - **AI Message Generation:** Generating **personalized messages** for patients using **OpenAI GPT-4**.
